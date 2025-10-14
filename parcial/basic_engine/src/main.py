@@ -13,6 +13,22 @@ from pathlib import Path
 
 WIDTH, HEIGHT = 800, 600  # Constantes globales
 
+SCENE_TYPE = "cpu"  # Opciones: "normal", "cpu"
+
+scene_configs = {
+    "normal": {
+        "scene_class": Scene,
+        "add_cubes": True,
+        "add_quad": False
+    },
+    "cpu": {
+        "scene_class": RayScene,
+        "add_cubes": True,
+        "add_quad": True
+    }
+    # Puedes agregar "gpu" después
+}
+
 window = Window(WIDTH, HEIGHT, "Basic Graphic Engine")
 
 # Shaders
@@ -46,10 +62,21 @@ quad = Quad((0, 0, 0), (0, 0, 0), (6.5, 1, 1), name="Sprite", hittable=False)
 camera = Camera((0, 0, 10), (0, 0, 0), (0, 1, 0), 45, WIDTH / HEIGHT, 0.1, 100.0)
 
 # Escena con Raytracing CPU
-scene = RayScene(window.ctx, camera, WIDTH, HEIGHT)
-scene.add_object(quad, material_sprite)
-scene.add_object(cube1, material)
-scene.add_object(cube2, material)
+#scene = RayScene(window.ctx, camera, WIDTH, HEIGHT)
+#scene.add_object(quad, material_sprite)
+#scene.add_object(cube1, material)
+#scene.add_object(cube2, material)
+
+# Selección de escena según SCENE_TYPE
+cfg = scene_configs[SCENE_TYPE]
+scene = cfg["scene_class"](window.ctx, camera, WIDTH, HEIGHT) if SCENE_TYPE == "cpu" else cfg["scene_class"](window.ctx, camera)
+
+if cfg["add_quad"]:
+    scene.add_object(quad, material_sprite)
+if cfg["add_cubes"]:
+    scene.add_object(cube1, material)
+    scene.add_object(cube2, material)
+
 window.set_scene(scene)
 
 window.run()

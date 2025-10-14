@@ -32,6 +32,8 @@ class Scene:
         self.ctx.viewport = (0, 0, width, height)
         self.camera.projection = glm.perspective(glm.radians(45), width / height, 0.1, 100.0)
 
+    def start(self):
+        pass 
 
 class RayScene(Scene):
     def __init__(self, ctx, camera, width, height):
