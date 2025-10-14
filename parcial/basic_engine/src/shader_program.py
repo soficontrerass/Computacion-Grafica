@@ -27,3 +27,31 @@ class ShaderProgram:
                 uniform.write(value.to_bytes())
             elif hasattr(uniform, "value"):
                 uniform.value = value
+
+class ComputeShaderProgram:
+    def __init__(self, ctx, compute_shader_path):
+        # Cargar el código fuente del compute shader
+        with open(compute_shader_path) as file:
+            compute_source = file.read()
+        # Compilar el compute shader en el contexto de OpenGL
+        self.prog = ctx.compute_shader(compute_source)
+
+        # Descubrir los uniforms disponibles en el shader
+        uniforms = []
+        for name in self.prog:
+            member = self.prog[name]
+            if type(member).__name__ == "Uniform":
+                uniforms.append(name)
+        self.uniforms = uniforms
+
+    def set_uniform(self, name, value):
+        if name in self.uniforms:
+            uniform = self.prog[name]
+            # Si es una matriz glm, convertir a bytes
+            if hasattr(value, "to_bytes"):
+                uniform.write(value.to_bytes())
+            elif hasattr(uniform, "value"):
+                uniform.value = value
+
+    def run(self, groups_x, groups_y, groups_z=1):
+            self.prog.run(group_x=groups_x, group_y=groups_y, group_z=groups_z)
