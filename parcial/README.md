@@ -1,189 +1,153 @@
-# Motor Gráfico Básico - TP4
+# Proyecto de Computación Gráfica: Motor Básico con Raytracing CPU y GPU
 
-Este proyecto implementa un motor gráfico básico en Python usando Pyglet y ModernGL. Permite crear, mover y renderizar figuras geométricas 3D simples, como cubos, en una ventana interactiva.
+## Descripción
 
----
-
-## Requisitos
-
-- Python 3.8 o superior
-- Windows, macOS o Linux
+Este proyecto implementa un motor gráfico básico en Python utilizando **ModernGL** y **Pyglet**. Permite visualizar escenas 3D con renderizado tradicional (Vertex/Fragment Shader), raytracing por CPU y raytracing por GPU (Compute Shader). Incluye soporte para materiales, texturas, animación, detección de colisiones y un sistema de cámara flexible.
 
 ---
 
-## Instalación
+## Modos de Renderizado
 
-1. Clona el repositorio o copia la carpeta del proyecto.
-2. Abre una terminal en la carpeta principal (`tp4/basic_engine`).
-3. Crea y activa el entorno virtual:
+- **Normal:** Renderizado tradicional con Vertex y Fragment Shader.
+- **CPU:** Raytracing realizado completamente en Python, píxel por píxel.
+- **GPU:** Raytracing acelerado por GPU usando Compute Shader y SSBOs.
 
-   ```powershell
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
-
-4. Instala las dependencias:
-
-   ```powershell
-   pip install pyglet moderngl numpy PyGLM
-   ```
+La configuración de la escena (objetos, materiales, tamaño y posición de los quads) se adapta según el modo para asegurar el funcionamiento correcto y la visualización esperada.
 
 ---
 
-## Estructura del proyecto
+## Primitivas y Modelos
 
-```
-basic_engine/
-├─ shaders/
-│  ├─ basic.vert
-│  └─ basic.frag
-└─ src/
-   ├─ main.py
-   ├─ window.py
-   ├─ scene.py
-   ├─ shader_program.py
-   ├─ graphics.py
-   ├─ camera.py
-   └─ cube.py
-```
+- **Triángulos:** Unidad básica de construcción.
+- **Quad:** Compuesto por 2 triángulos.
+- **Cube:** Compuesto por 12 triángulos (2 por cada cara).
+
+---
+
+## Estructura del Proyecto
+
+- **Modelos:** Clases `Cube`, `Quad`, etc.
+- **Materiales:** Clases `Material`, `StandardMaterial`.
+- **Texturas:** Clase `Texture`.
+- **Cámara:** Clase `Camera` con matrices de vista y proyección.
+- **Raytracer:** Clases `RayTracer` (CPU) y `RayTracerGPU` (GPU).
+- **Escena:** Clases `Scene`, `RayScene`, `RaySceneGPU`.
+- **Colisiones:** Clases `HitBox`, `HitBoxOBB` para detección eficiente.
+- **Shaders:** Vertex, Fragment y Compute Shaders escritos en GLSL.
+
+---
+
+## Cuestionario de la Profe (Respuestas)
+
+### General de Computación Gráfica
+
+- **Modelo de color:** RGB (y RGBA). Usado porque las pantallas mezclan luz roja, verde y azul.
+- **Primitivas gráficas:** Triángulos.
+- **Producto escalar:** Calcula ángulos/proyecciones entre vectores. Devuelve un escalar (float).
+- **Producto vectorial:** Calcula un vector perpendicular. Devuelve un vector.
+- **Coordenada homogénea w para punto:** 1 (afecta traslación).
+- **Coordenada homogénea w para dirección:** 0 (no afecta traslación).
+- **Transformación entre espacios:** Matriz de transformación (4x4).
+- **Dimensiones de matriz:** 4x4 para 3D homogéneo.
+- **Inversa de matriz:** Deshace transformaciones (ej: pasar de cámara a mundo).
+- **Espacio del Objeto:** Coordenadas locales del objeto.
+- **Espacio del Mundo:** Coordenadas globales de la escena.
+- **Espacio de Vista:** Coordenadas relativas a la cámara.
+- **Origen en pantalla:** Depende del sistema (OpenGL: esquina inferior izquierda).
+- **Origen en objeto:** Centro geométrico.
+- **Coordenadas NDC:** Normalizadas de -1 a 1.
+- **Proyección perspectiva vs ortográfica:** Perspectiva simula profundidad, ortográfica no.
+- **VBO, IBO, VAO:** Buffers y organización de datos de vértices.
+- **Normal de un vértice:** Dirección perpendicular a la superficie.
+- **Lenguaje de shaders:** GLSL.
+- **Vertex Shader:** Procesa vértices.
+- **Fragment Shader:** Procesa fragmentos (píxeles).
+- **Orden de ejecución:** Vertex Shader → Rasterización → Fragment Shader.
+- **Compute Shader:** No recorre unidades geométricas, ejecuta work groups en GPU.
+- **Vertex/Fragment vs Compute Shader:** Los primeros están atados al pipeline, el Compute es general y paralelo.
+- **Work group:** Grupo de hilos en Compute Shader.
+- **Uniforms:** Variables globales para todos los shaders; atributos varían por vértice.
+- **Sampler2D:** Uniform para texturas 2D.
+- **Ray:** Semirrecta con origen y dirección.
+
+### Proyecto
+
+- **Matrices de transformación:** En modelos y cámara.
+- **Origen de los Rays:** Desde la cámara hacia cada píxel.
+- **HitBox:** Detecta colisiones rayo-objeto.
+- **Rays para mouse picking:** Solo uno.
+- **Pyglet:** Ventana, loop y eventos.
+- **ModernGL:** Wrapper de OpenGL para Python.
+- **Atributos de Model:** Vértices, índices, colores, normales, texcoords.
+- **Ventaja de separar atributos:** Flexibilidad y eficiencia.
+- **Nombres de atributos:** Deben coincidir con los del shader.
+- **Paso de atributos al shader:** VBOs y VAO.
+- **Material:** Relaciona shader y texturas.
+- **Texture:** Almacena imagen y la convierte a bytes para OpenGL.
+- **Nombres de texturas:** Deben coincidir con los uniforms del shader.
+- **Cambio de color de cubo:** Cambiar la textura y el material.
+- **Animación de cubo:** Usar `animated=False` para desactivar.
+- **UV en Fragment Shader:** Para mapear texturas.
+- **No multiplicar por MVP:** El objeto no se transforma correctamente.
+- **Depth Test deshabilitado:** No se ocultan fragmentos detrás de otros.
+- **Vertex-Fragment Shader:** Se ejecuta por objeto.
+- **Raycasting vs Raytracing:** Raycasting solo colisión, Raytracing calcula color, sombras, etc.
+- **Rays por frame:** Uno por píxel (depende de la resolución).
+- **Uso de Quad en Raytracing:** Para mostrar la textura generada.
+- **Parámetro hittable:** Controla si el objeto es colisionable.
+- **Quad completamente rojo:** Probablemente hittable=True o demasiados objetos.
+- **Color del cielo:** En la clase Camera con `set_sky_colors`.
+- **Trazado de rayos CPU:** En `trace_ray` de `RayTracer`.
+- **Raytracing CPU vs GPU:** CPU es secuencial, GPU es paralelo.
+- **Color del cielo en GPU:** En el Compute Shader, se puede pasar como uniform.
+- **Trazado de rayos GPU:** En el Compute Shader, resultado es una textura.
+- **Raytracer vs RaytracerGPU:** CPU hace todo en Python, GPU delega a Compute Shader.
+- **Por qué Compute Shader:** Permite acceso global y paralelo a toda la escena.
+- **Datos complejos al Compute Shader:** Usamos SSBOs.
+- **SSBOs:** Buffers para datos complejos y grandes.
+- **Declaración de SSBO:** Con `buffer` y `layout(binding=...)` en GLSL.
+- **Importancia del binding:** Es lo que importa, no el nombre.
+- **models_f:** Matrices de transformación de objetos.
+- **inv_f:** Matrices inversas de transformación.
+- **mats_f:** Materiales de los objetos.
+- **primitives:** Información geométrica para el BVH.
+- **BVH:** Optimiza colisiones agrupando objetos.
+- **Luz perpendicular:** Máxima iluminación.
+- **Luz paralela:** Sin iluminación directa.
+- **Luz ambiental:** Iluminación base uniforme.
+- **Luz difusa:** Sombreado según ángulo de la luz.
+- **Luz especular:** Brillos/reflejos puntuales.
+- **Sombras más oscuras:** Reducir el valor devuelto en `calculateShadow`.
+
+---
+
+## Notas y Solución a Problemas
+
+- **Al agregar soporte GPU, la configuración de la escena (especialmente el tamaño y posición del quad) debe adaptarse para cada modo.**
+- **Si en modo "normal" o "cpu" solo ves un cubo o el fondo no aparece, revisa:**
+  - Que ambos cubos estén agregados a la escena.
+  - Que el quad (piso) no tape toda la pantalla o tenga `hittable=False` si solo es para mostrar la textura.
+  - Que los objetos tengan `animated=False` si no quieres que se muevan o roten inesperadamente.
 
 ---
 
 ## Ejecución
 
-Desde la carpeta `src`, ejecuta:
+1. Instala dependencias:
 
-```powershell
-python main.py
-```
+`pip install pyglet moderngl PyGLM numpy`
 
-Se abrirá una ventana con dos cubos 3D renderizados.
+2. Ejecuta el proyecto:
 
----
+`python main.py`
 
-## Proceso y soluciones
-
-### 1. **Corrección de rutas para los shaders**
-
-**Problema:**  
-El programa no encontraba los archivos de los shaders.
-
-**Solución:**  
-Se usó `os.path` para construir la ruta absoluta:
-
-```python
-# main.py
-import os
-
-shader_dir = os.path.join(os.path.dirname(__file__), '..', 'shaders')
-vertex_shader_path = os.path.join(shader_dir, 'basic.vert')
-fragment_shader_path = os.path.join(shader_dir, 'basic.frag')
-shader_program = ShaderProgram(window.ctx, vertex_shader_path, fragment_shader_path)
-```
-*Esto asegura que los shaders se carguen correctamente sin importar el directorio de ejecución.*
-
----
-
-### 2. **Corrección de sintaxis en los shaders**
-
-**Problema:**  
-Errores de compilación GLSL por nombres incorrectos de atributos.
-
-**Solución:**  
-Se corrigieron los nombres en el shader de vértices:
-
-```glsl
-// basic.vert
-#version 330
-
-in vec3 in_pos;
-in vec3 in_color;
-out vec3 v_color;
-uniform mat4 Mvp;
-
-void main() {
-    gl_Position = Mvp * vec4(in_pos, 1.0);
-    v_color = in_color;
-}
-```
-*Los nombres deben coincidir con los usados en el VAO en Python.*
-
----
-
-### 3. **Configuración correcta del VAO**
-
-**Problema:**  
-Error `ValueError: not enough values to unpack (expected at least 2, got 1)`.
-
-**Solución:**  
-Se configuró el VAO con el formato correcto:
-
-```python
-# graphics.py
-self.vao = ctx.vertex_array(
-    shader_program.prog,
-    [
-        (self.vbo, '3f 3f', "in_pos", "in_color"),
-    ],
-    self.ibo
-)
-```
-*Esto indica que cada vértice tiene 3 floats para posición y 3 para color, y los nombres coinciden con los del shader.*
-
----
-
-### 4. **Envío de la matriz MVP al shader**
-
-**Problema:**  
-Los cubos no se veían porque no se transformaban correctamente.
-
-**Solución:**  
-Se calculó y envió la matriz MVP antes de renderizar cada objeto:
-
-```python
-# scene.py
-def render(self):
-    for obj in self.objects:
-        mvp = self.projection @ self.view @ obj.get_model_matrix()
-        self.graphics[obj.name].set_uniform("Mvp", mvp)
-        self.graphics[obj.name].vao.render()
-```
-*Esto transforma cada objeto según su posición, la cámara y la proyección.*
-
----
-
-### 5. **Activación del Depth Test**
-
-**Problema:**  
-Las caras de los cubos se superponían incorrectamente.
-
-**Solución:**  
-Se activó el buffer de profundidad en cada frame:
-
-```python
-# window.py
-def on_draw(self):
-    self.clear()
-    self.ctx.clear()
-    self.ctx.enable(moderngl.DEPTH_TEST)
-    if self.scene:
-        self.scene.render()
-```
-*Esto permite que la GPU dibuje correctamente las caras según su profundidad.*
+3. Cambia el modo de renderizado (`SCENE_TYPE`) en `main.py` según lo que quieras probar. (`normal`, `cpu`, `gpu`)
 
 ---
 
 ## Evidencias
 
-![Ventana Negra](evidencias/imagen1.png)
-![Solucion con MVP](evidencias/imagen2.png)
-![Buffer de profundidad](evidencias/imagen3.png)
----
-
-## Reflexión
-
-- Si no se envía la matriz MVP al shader, los objetos no se ven correctamente porque no se transforman según la cámara y la proyección.
-- El buffer de profundidad es esencial para que los objetos se dibujen en el orden correcto según su distancia a la cámara.
-- Cada objeto necesita su propia matriz MVP porque puede tener transformaciones distintas.
-
----
+![Normal](evidencias/normal1.png)
+![Golpear cubos](evidencias/normal.png)
+![CPU](evidencias/cpu.png)
+![GPU](evidencias/gpu.png)
