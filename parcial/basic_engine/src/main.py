@@ -10,7 +10,7 @@ from pathlib import Path
 
 WIDTH, HEIGHT = 800, 600
 
-SCENE_TYPE = "gpu"  # Opciones: "normal", "cpu", "gpu"
+SCENE_TYPE = "cpu"  # Opciones: "normal", "cpu", "gpu"
 
 scene_configs = {
     "normal": {
@@ -61,7 +61,7 @@ material_sprite = Material(shader_sprite, textures_data=[sprite_texture])
 
 cube1 = Cube((2, 0, 5), (0, 0, 0), (1, 1, 1), name="Cube1")
 cube2 = Cube((-2, 0, 5), (0, 0, 0), (1, 1, 1), name="Cube2")
-quad = Quad((0, -3, 0), (-90, 0, 0), (10, 15, 1), name="Floor", animated=False)
+quad = Cube((0, -3, 0), (-90, 0, 0), (10, 15, 1), name="Floor", animated=False)
 sprite = Quad((0, 0, 0), (0, 0, 0), (10, 15, 1), name="Sprite", animated=False, hittable=False)
 
 camera = Camera((0, 0, 15), (0, 0, 0), (0, 1, 0), 45, WIDTH / HEIGHT, 0.01, 100.0)

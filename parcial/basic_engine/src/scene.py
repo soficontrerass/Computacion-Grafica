@@ -25,9 +25,15 @@ class Scene:
                 obj.rotation += glm.vec3(0.8, 0.6, 0.4)
                 obj.position.x += math.sin(self.time) * 0.01
 
-        model = obj.get_model_matrix()
-        mvp = self.projection * self.view * model
-        self.graphics[obj.name].render({'Mvp': mvp})
+            model = obj.get_model_matrix()
+            mvp = self.projection * self.view * model
+            self.graphics[obj.name].render({'Mvp': mvp})
+
+    def on_mouse_click(self, u, v):
+        ray =  self.camera.raycast(u, v)
+        for obj in self.objects:
+            if obj.check_hit(ray.origin, ray.direction):
+                print(f"Golpeaste al objeto {obj.name} !")
 
     def on_resize(self, width, height):
         self.ctx.viewport = (0, 0, width, height)

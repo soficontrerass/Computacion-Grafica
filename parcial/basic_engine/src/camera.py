@@ -34,7 +34,7 @@ class Camera:
     def raycast(self, u, v):
         # Convertir coordenadas [0,1] a NDC [-1,1]
         ndc_x = (2 * u) - 1
-        ndc_y = 1 - (2 * v)
+        ndc_y = (2 * v) - 1
         
         # Ajuste por FOV y aspect ratio
         fov_adjustment = glm.tan(glm.radians(self.fov) / 2)
